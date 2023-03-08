@@ -155,7 +155,7 @@ def recieve_prompt():
 
 			if is_create_new_conversation or len(user["conversations"]) == 0:
 				# Make a new conversation
-				conversation = Conversation(dict(messages=[{"content": "Your name is OpenAssignment, OA in short. Your role is to assist users with assignments and theoretical questions.", "role": "system"}])).__dict__
+				conversation = Conversation(dict(messages=[{"content": "Your name is OpenAssignment, OA in short, created by Libby Lebyane. Your role is to assist users with assignments and theoretical questions.", "role": "system"}])).__dict__
 				user["conversations"].append(conversation)
 				send_response_message(extracted_data_points["from_"], "I'm *OpenAssignment*. A new conversation has been started, say *\"Hi\"* again to reset the conversation.\n\nCourtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information.", media=["https://storage.googleapis.com/hetchfund_files_bucket/support%40towardscommonfoundry.com/f8ab1c6c-ad02-4191-acf9-0104cd9c3e7c.png"])
 
