@@ -141,10 +141,11 @@ def recieve_prompt():
 				user = User(extracted_data_points).__dict__
 				users.insert_one( user )
 
-			# TODO: deplete the available funds
+			# TODO: deplete the available funds, done
 			required_usage = calculate_required_usage(extracted_data_points["body"])
 			random_utilities.log(f"Prompt requires: ${required_usage}")
 			available_funds_after_prompt = 0 if user["available_funds"] == 0 else user["available_funds"] - required_usage
+			
 			if available_funds_after_prompt <= 0:
 				send_response_message(extracted_data_points["from_"], "You don't have enough funds to make this prompt.\n\n*Recharge your account here: https://pay.yoco.com/towards-common-foundry*\n\n*Use your WhatsApp phone number as reference*, _then say \"Hi\" again in a few minutes._")
 				return Response(cd=200).to_json()
@@ -153,6 +154,16 @@ def recieve_prompt():
 			current_day = random_utilities.models.time_created.TimeCreatedModel().day
 			is_create_new_conversation = True if ("Hi" in extracted_data_points["body"]) else False
 
+	   if "instructions" == extracted_data_points["body"].lower():
+					return send_response_message("Here are instructions for the usage:\n1. Hi - Start a new conversation\n2. Balance - Show your top up balance\n3. Exit / Stop - Unsubscribe from the assistant"
+				
+				if "balance" == extracted_data_points["body"].lower():
+					user = users.find_one({ "whatsapp_id": extracted_data_points["whatsapp_id"] })
+				 if user:
+							return send_response_message(f"Balance : R{user["topup_balance"]}")
+					else:
+							send_response_message("Balance: R0.00")
+			
 			if is_create_new_conversation or len(user["conversations"]) == 0:
 				# Make a new conversation
 				conversation = Conversation(dict(messages=[{"content": "Your name is *OpenAssignment*, OA in short, developed by *Libby Lebyane*. Your're a *smart assignment assistant* and can assist with *theoretical questions*.", "role": "system"}])).__dict__
