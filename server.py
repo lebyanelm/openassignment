@@ -153,16 +153,6 @@ def recieve_prompt():
 			# Check if a new conversation is requied
 			current_day = random_utilities.models.time_created.TimeCreatedModel().day
 			is_create_new_conversation = True if ("Hi" in extracted_data_points["body"]) else False
-
-	  if "instructions" == extracted_data_points["body"].lower():
-				return send_response_message("Here are instructions for the usage:\n1. Hi - Start a new conversation\n2. Balance - Show your top up balance\n3. Exit / Stop - Unsubscribe from the assistant"
-				
-			if "balance" == extracted_data_points["body"].lower():
-				user = users.find_one({ "whatsapp_id": extracted_data_points["whatsapp_id"] })
-				if user:
-					return send_response_message(f"Balance : R{user["available_funds"]}")
-				else:
-						send_response_message("Balance: R0.00")
 			
 			if is_create_new_conversation or len(user["conversations"]) == 0:
 				# Make a new conversation
