@@ -160,7 +160,7 @@ def recieve_prompt():
 				if "balance" == extracted_data_points["body"].lower():
 					user = users.find_one({ "whatsapp_id": extracted_data_points["whatsapp_id"] })
 				 if user:
-							return send_response_message(f"Balance : R{user["topup_balance"]}")
+							return send_response_message(f"Balance : R{user["available_funds"]}")
 					else:
 							send_response_message("Balance: R0.00")
 			
