@@ -109,13 +109,13 @@ def calculate_required_usage(prompt: str):
 	
 	return tokens_used * amount_per_token
 
-RESPONSE_MESSAGES = dict(
+RESPONSE_MESSAGES = {
 	"MENU": "Here's available menu options:\n\n 1. Balance.\n2. Topup.\n3. About\n4. Terms of usage / usage.",
 	"FEEDBACK": "I'd love to hear what you think, do tell me: Use format \"Feedback: <feedback content here>\" to send your feedback to us.",
 	"ABOUT": "I'm *OpenAssignment*, a smart assistant designed to assist you with *academic assignments* and *school work*. You can ask me anything and I'll do my best to answer you. \n Courtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information.",
 	"TOPUP": "To topup your OpenAssignment account follow this link to make a deposit with your card, *use your WhatsApp phone number as reference*: *https://pay.yoco.com/towards-common-foundry*.",
 	"NO_BALANCE": "You don't have enough funds for this request."
-)
+}
 
 
 
