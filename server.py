@@ -184,7 +184,7 @@ def recieve_prompt():
 				# Make a new conversation
 				conversation = Conversation(dict(messages=[{"content": "Your name is *OpenAssignment*, a *smart assignment assistant*, developed by *Libby Lebyane* sourced from OpenAI: Your're helpful and can assist with theoretical questions.", "role": "system"}])).__dict__
 				user["conversations"].append(conversation)
-				send_response_message(extracted_data_points["from_"], f"Hello {extracted_data_points["from_"]}.\n\n {RESPONSE_MESSAGES['MENU']}.\n\nCourtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information.", media=["https://storage.googleapis.com/hetchfund_files_bucket/support%40towardscommonfoundry.com/f8ab1c6c-ad02-4191-acf9-0104cd9c3e7c.png"])
+				send_response_message(extracted_data_points["from_"], f"Hello {extracted_data_points['from_']}.\n\n {RESPONSE_MESSAGES['MENU']}.\n\nCourtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information.", media=["https://storage.googleapis.com/hetchfund_files_bucket/support%40towardscommonfoundry.com/f8ab1c6c-ad02-4191-acf9-0104cd9c3e7c.png"])
 
 			# Make a request message wrapper
 			request_message = Message(dict(role="user", content=extracted_data_points["body"])).__dict__
