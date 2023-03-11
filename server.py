@@ -164,7 +164,7 @@ def recieve_prompt():
 			if extracted_data_points["body"].lower() in available_options:
 				if extracted_data_points["body"] in ["menu", "menu."]:
 					return send_response_message(extracted_data_points["from_"], f"Hello {extracted_data_points['from_']}.\n\n {RESPONSE_MESSAGES['MENU']}")
-				elif extracted_data_points["body"] in ["balance", "balance."]: "feedback", "feedback."]:
+				elif extracted_data_points["body"] in ["balance", "balance.", "feedback", "feedback."]:
 					return send_response_message(extracted_data_points["from_"], f"Your OpenAssignment balance is: R{user['available_funds']}.")
 				elif extracted_data_points["body"] in ["topup", "topup."]:
 					return send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["TOPUP"])
