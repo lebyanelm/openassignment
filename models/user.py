@@ -18,5 +18,6 @@ class User():
         self.conversations = data.get("conversations", [])
 
         # User will be allowed to top-up their account for the user of the bot.
-        self.available_funds = data.get("available_amount", 0)
+        self.available_funds = data.get("available_amount", 5)
+        self.email_address = data.get("email_address", None)
         self.version = (1, 0, 0)
