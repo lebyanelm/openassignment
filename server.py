@@ -161,6 +161,7 @@ def recieve_prompt():
 			
 			# Check if the request has a special ask such as: Balance, Quit, Feedback, Menu, Topup, Help, More.
 			available_options = ("menu", "menu.", "balance", "balance.", "topup", "topup.", "about", "about.", "terms of usage", "terms of usage.", "usage", "usage.")
+			print(extracted_data_points["body"])
 			if extracted_data_points["body"].lower() in available_options:
 				if extracted_data_points["body"] in ["menu", "menu."]:
 					return send_response_message(extracted_data_points["from_"], f"Hello {extracted_data_points['from_']}.\n\n {RESPONSE_MESSAGES['MENU']}")
