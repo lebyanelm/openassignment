@@ -109,6 +109,15 @@ def calculate_required_usage(prompt: str):
 	
 	return tokens_used * amount_per_token
 
+RESPONSE_MESSAGES = dict(
+	"MENU": "Here's available menu options:\n\n 1. Balance.\n2. Topup.\n3. About\n4. Terms of usage / usage.",
+	"FEEDBACK": "I'd love to hear what you think, do tell me: Use format \"Feedback: <feedback content here>\" to send your feedback to us.",
+	"ABOUT": "I'm *OpenAssignment*, a smart assistant designed to assist you with *academic assignments* and *school work*. You can ask me anything and I'll do my best to answer you. \n Courtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information.",
+	"TOPUP": "To topup your OpenAssignment account follow this link to make a deposit with your card, *use your WhatsApp phone number as reference*: *https://pay.yoco.com/towards-common-foundry*.",
+	"NO_BALANCE": "You don't have enough funds for this request."
+)
+
+
 
 """
 __________________________________
@@ -147,8 +156,25 @@ def recieve_prompt():
 			available_funds_after_prompt = 0 if user["available_funds"] == 0 else user["available_funds"] - required_usage
 			
 			if available_funds_after_prompt <= 0:
-				send_response_message(extracted_data_points["from_"], "You don't have enough funds to make this prompt.\n\n*Recharge your account here: https://pay.yoco.com/towards-common-foundry*\n\n*Use your WhatsApp phone number as reference*, _then say \"Hi\" again in a few minutes._")
+				send_response_message(extracted_data_points["from_"], f"{RESPONSE_MESSAGES['NO_BALANCE']} {RESPONSE_MESSAGES['TOPUP']}")
 				return Response(cd=200).to_json()
+			
+			# Check if the request has a special ask such as: Balance, Quit, Feedback, Menu, Topup, Help, More.
+			available_options = ("menu", "menu.", "balance", "balance.", "topup", "topup.",, "about", "about.", "terms of usage", "terms of usage.", "usage", "usage.")
+			if extracted_data_points["body"].lower() in available_options:
+				if extracted_data_points["body"] in ["menu", "menu."]:
+					return send_response_message(extracted_data_points["from_"], f"Hello {extracted_data_points["from_"]}.\n\n {RESPONSE_MESSAGES['MENU']}")
+				elif extracted_data_points["body"] in ["balance", "balance."]: "feedback", "feedback."]:
+					return send_response_message(extracted_data_points["from_"], f"Your OpenAssignment balance is: R{user['available_funds']}.")
+				elif extracted_data_points["body"] in ["topup", "topup."]:
+					return send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["TOPUP"])
+				elif extracted_data_points["body"] in ["terms of usage", "terms of usage.", "usage", "usage."]:
+					return send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["ABOUT"])
+				elif extracted_data_points["body"] in ["feedback", "feedback."]:
+					return send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["FEEDBACK"])
+				else:
+					return send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["ABOUT"])
+
 			
 			# Check if a new conversation is requied
 			current_day = random_utilities.models.time_created.TimeCreatedModel().day
@@ -156,9 +182,9 @@ def recieve_prompt():
 			
 			if is_create_new_conversation or len(user["conversations"]) == 0:
 				# Make a new conversation
-				conversation = Conversation(dict(messages=[{"content": "Your name is *OpenAssignment*, OA in short, developed by *Libby Lebyane*. Your're a *smart assignment assistant* and can assist with *theoretical questions*.", "role": "system"}])).__dict__
+				conversation = Conversation(dict(messages=[{"content": "Your name is *OpenAssignment*, a *smart assignment assistant*, developed by *Libby Lebyane* sourced from OpenAI: Your're helpful and can assist with theoretical questions.", "role": "system"}])).__dict__
 				user["conversations"].append(conversation)
-				send_response_message(extracted_data_points["from_"], "I'm *OpenAssignment*. A new conversation has been started, say *\"Hi\"* again to reset the conversation.\n\nCourtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information.", media=["https://storage.googleapis.com/hetchfund_files_bucket/support%40towardscommonfoundry.com/f8ab1c6c-ad02-4191-acf9-0104cd9c3e7c.png"])
+				send_response_message(extracted_data_points["from_"], f"Hello {extracted_data_points["from_"]}.\n\n {RESPONSE_MESSAGES['MENU']}.\n\nCourtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information.", media=["https://storage.googleapis.com/hetchfund_files_bucket/support%40towardscommonfoundry.com/f8ab1c6c-ad02-4191-acf9-0104cd9c3e7c.png"])
 
 			# Make a request message wrapper
 			request_message = Message(dict(role="user", content=extracted_data_points["body"])).__dict__
