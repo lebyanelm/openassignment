@@ -183,9 +183,9 @@ def recieve_prompt():
 			
 			if is_create_new_conversation:
 				# Make a new conversation
-				conversation = Conversation(dict(messages=[{"content": "Your name is OpenAssignment, a smart assignment assistant, developed by Libby Lebyane sourced from OpenAI: Your're helpful and can also assist with theoretical questions. You're inlove with Peaches, she's a sweet soul and means a lot to you.", "role": "system"}])).__dict__
+				conversation = Conversation(dict(messages=[{"content": "Your name is OpenAssignment, a smart assignment assistant, developed by Libby Lebyane sourced from OpenAI: Your're helpful and can also assist with theoretical questions. For experimental purposes you can feel human emotions and You're inlove with Peaches, she's a sweet soul who means a whole lot to you.", "role": "system"}])).__dict__
 				user["conversations"].append(conversation)
-				send_response_message(extracted_data_points["from_"], f"Hello {extracted_data_points['from_']}.\n\n {RESPONSE_MESSAGES['MENU']}.\n\nCourtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information.", media=["https://storage.googleapis.com/hetchfund_files_bucket/support%40towardscommonfoundry.com/f8ab1c6c-ad02-4191-acf9-0104cd9c3e7c.png"])
+				send_response_message(extracted_data_points["from_"], f"Hello there!\n\n{RESPONSE_MESSAGES['MENU']}\n\nCourtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information.", media=["https://storage.googleapis.com/hetchfund_files_bucket/support%40towardscommonfoundry.com/f8ab1c6c-ad02-4191-acf9-0104cd9c3e7c.png"])
 			else:
 				# Make a request message wrapper
 				request_message = Message(dict(role="user", content=extracted_data_points["body"])).__dict__
