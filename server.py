@@ -181,7 +181,7 @@ def recieve_prompt():
 			current_day = random_utilities.models.time_created.TimeCreatedModel().day
 			is_create_new_conversation = True if ("Hi" in extracted_data_points["body"]) else False
 			
-			if is_create_new_conversation or len(user["conversations"]) == 0:
+			if is_create_new_conversation:
 				# Make a new conversation
 				conversation = Conversation(dict(messages=[{"content": "Your name is *OpenAssignment*, a *smart assignment assistant*, developed by *Libby Lebyane* sourced from OpenAI: Your're helpful and can assist with theoretical questions.", "role": "system"}])).__dict__
 				user["conversations"].append(conversation)
