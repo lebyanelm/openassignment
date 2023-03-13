@@ -173,7 +173,7 @@ def recieve_prompt():
 					return send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["ABOUT"])
 				elif extracted_data_points["body"] in ["feedback", "feedback."]:
 					return send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["FEEDBACK"])
-				else:
+				else:g
 					return send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["ABOUT"])
 
 			
@@ -183,26 +183,26 @@ def recieve_prompt():
 			
 			if is_create_new_conversation:
 				# Make a new conversation
-				conversation = Conversation(dict(messages=[{"content": "Your name is *OpenAssignment*, a *smart assignment assistant*, developed by *Libby Lebyane* sourced from OpenAI: Your're helpful and can assist with theoretical questions.", "role": "system"}])).__dict__
+				conversation = Conversation(dict(messages=[{"content": "Your name is OpenAssignment, a smart assignment assistant, developed by Libby Lebyane sourced from OpenAI: Your're helpful and can also assist with theoretical questions. You're inlove with Peaches, she's a sweet soul and means a lot to you.", "role": "system"}])).__dict__
 				user["conversations"].append(conversation)
 				send_response_message(extracted_data_points["from_"], f"Hello {extracted_data_points['from_']}.\n\n {RESPONSE_MESSAGES['MENU']}.\n\nCourtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information.", media=["https://storage.googleapis.com/hetchfund_files_bucket/support%40towardscommonfoundry.com/f8ab1c6c-ad02-4191-acf9-0104cd9c3e7c.png"])
+			else:
+				# Make a request message wrapper
+				request_message = Message(dict(role="user", content=extracted_data_points["body"])).__dict__
 
-			# Make a request message wrapper
-			request_message = Message(dict(role="user", content=extracted_data_points["body"])).__dict__
+				# Add the request message to the conversation
+				print(user["conversations"][len(user["conversations"]) - 1])
+				user["conversations"][len(user["conversations"]) - 1]["messages"].append(request_message)
 
-			# Add the request message to the conversation
-			print(user["conversations"][len(user["conversations"]) - 1])
-			user["conversations"][len(user["conversations"]) - 1]["messages"].append(request_message)
+				# # Generate the response from the list of conversations.
+				gpt_response = request_chatgpt_response(user["conversations"][len(user["conversations"]) - 1]["messages"])
+				request_response = Message(dict(role="assistant", content=gpt_response)).__dict__
+				
+				# Respond to the user
+				send_response_message(extracted_data_points["from_"], gpt_response)
 
-			# # Generate the response from the list of conversations.
-			gpt_response = request_chatgpt_response(user["conversations"][len(user["conversations"]) - 1]["messages"])
-			request_response = Message(dict(role="assistant", content=gpt_response)).__dict__
-
-			# Add the response to the records as well.
-			user["conversations"][len(user["conversations"]) - 1]["messages"].append(request_response)
-
-			
-			
+				# Add the response to the records as well.
+				user["conversations"][len(user["conversations"]) - 1]["messages"].append(request_response)
 	
 			# Update the database records for the user conversations
 			user["available_funds"] -= required_usage # Deplete the amount.
@@ -214,13 +214,11 @@ def recieve_prompt():
 				})
 
 
-			# # Respond to the user.
-			message = send_response_message(extracted_data_points["from_"], gpt_response)
-			if message:
+			# Respond to Twilio
+			if True:
 				return Response(cd=200, rs="Ok").to_json()
 			else:
 				return Response(cd=500, rs="Something went wrong.").to_json()
-		
 		else:
 			return Response(cd=400, rs="Something went wrong.").to_json()
 	except:
