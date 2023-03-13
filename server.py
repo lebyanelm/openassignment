@@ -140,7 +140,7 @@ def recieve_prompt():
 			extracted_data_points = dict(
 				whatsapp_id=parsed_data["WaId"][0],
 				profile_name=parsed_data["ProfileName"][0],
-				body=parsed_data["Body"][0],
+				body=parsed_data["Body"][0].lower(),
 				from_=parsed_data["From"][0]
 			)
 
@@ -162,7 +162,7 @@ def recieve_prompt():
 			# Check if the request has a special ask such as: Balance, Quit, Feedback, Menu, Topup, Help, More.
 			available_options = ("menu", "menu.", "balance", "balance.", "topup", "topup.", "about", "about.", "terms of usage", "terms of usage.", "usage", "usage.")
 			print(extracted_data_points["body"])
-			if extracted_data_points["body"].lower() in available_options:
+			if extracted_data_points["body"] in available_options:
 				if extracted_data_points["body"] in ["menu", "menu."]:
 					return send_response_message(extracted_data_points["from_"], f"Hello {extracted_data_points['from_']}.\n\n {RESPONSE_MESSAGES['MENU']}")
 				elif extracted_data_points["body"] in ["balance", "balance.", "feedback", "feedback."]:
@@ -179,7 +179,7 @@ def recieve_prompt():
 			
 			# Check if a new conversation is requied
 			current_day = random_utilities.models.time_created.TimeCreatedModel().day
-			is_create_new_conversation = True if ("Hi" in extracted_data_points["body"]) else False
+			is_create_new_conversation = True if ("hi" == extracted_data_points["body"]) else False
 			
 			if is_create_new_conversation:
 				# Make a new conversation
