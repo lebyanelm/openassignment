@@ -173,7 +173,7 @@ def recieve_prompt():
 					return send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["ABOUT"])
 				elif extracted_data_points["body"] in ["feedback", "feedback."]:
 					return send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["FEEDBACK"])
-				else:g
+				else:
 					return send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["ABOUT"])
 
 			
