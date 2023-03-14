@@ -22,7 +22,6 @@ import random
 from twilio.rest import Client
 from models.response import Response
 from models.user import User
-from models.conversation import Conversation
 from models.message import Message
 
 
@@ -76,7 +75,11 @@ def send_response_message(to, body, media = None):
 		to=to
 	)
 
-	return message
+	# Log purposes.
+	random_utilities.log(f'Message {body[0:20]} sent to: {to}.')
+
+	# Return.
+	return Response(cd=200).to_json()
 
 # Requests a response from the user's request prompt to: https://api.openai.com/v1/chat/completions
 models = openai.Model.list()
@@ -109,12 +112,18 @@ def calculate_required_usage(prompt: str):
 	
 	return tokens_used * amount_per_token
 
-RESPONSE_MESSAGES = {
-	"MENU": "Here's available menu options:\n\n 1. Balance.\n2. Topup.\n3. About\n4. Terms of usage / usage.",
+
+"""
+Template response messages.
+"""
+TEMPLATE_RESPONSE_MESSAGES = {
+	"DISCLOSURE": "Hello! This *should be used for educational purposes* only. Information curated may *_not be fully accurate_*. Please verify the information *_for more accuracy_*.",
+	"AVAILABLE_OPTIONS": '*_Menu_*\n1. *Balance* _("check balance" / "balance" / "available balance")_\n2. *Topup* _("recharge" / "restore" / "topup")_\n3. *About* _("about" / "help")_\n4. *Terminate* _("stop" / "delete account" / "terminate / "exit")_',
 	"FEEDBACK": "I'd love to hear what you think, do tell me: Use format \"Feedback: <feedback content here>\" to send your feedback to us.",
-	"ABOUT": "I'm *OpenAssignment*, a smart assistant designed to assist you with *academic assignments* and *school work*. You can ask me anything and I'll do my best to answer you. \n Courtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information.",
-	"TOPUP": "To topup your OpenAssignment account follow this link to make a deposit with your card, *use your WhatsApp phone number as reference*: *https://pay.yoco.com/towards-common-foundry*.",
-	"NO_BALANCE": "You don't have enough funds for this request."
+	"ABOUT": "I'm *OpenAssignment*, a smart assistant designed to assist you with *academic assignments* and *school work*. You can ask me anything and I'll do my best to answer you.",
+	"TOPUP": "To topup your *OpenAssignment* account follow this link to make a deposit with your card, *use your WhatsApp phone number as reference*: *https://pay.yoco.com/towards-common-foundry*.",
+	"NO_BALANCE": "You don't have enough funds for this request.",
+	"ATTRIBUTION": "Courtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information."
 }
 
 
@@ -126,7 +135,7 @@ __________________________________
 # Returns status of the server
 @server_instance.route("/openassignment/recieve", methods=["POST"])
 @flask_cors.cross_origin()
-def recieve_prompt():
+def recieve_message_prompt():
 	try:
 		# Read the data and convert it from binary to ASCII.
 		request_data = flask.request.get_data().decode("ascii")
@@ -146,83 +155,58 @@ def recieve_prompt():
 			# Check if an already saved user exists in the database.
 			user = users.find_one({ "whatsapp_id": extracted_data_points["whatsapp_id"] })
 			if not user:
+				# If not create a new one.
 				user = User(extracted_data_points).__dict__
 				users.insert_one( user )
 
-			# TODO: deplete the available funds, done
-			required_usage = calculate_required_usage(extracted_data_points["body"])
-			random_utilities.log(f"Prompt requires: ${required_usage}")
-			available_funds_after_prompt = 0 if user["available_funds"] == 0 else user["available_funds"] - required_usage
-			
-			if available_funds_after_prompt <= 0:
-				send_response_message(extracted_data_points["from_"], f"{RESPONSE_MESSAGES['NO_BALANCE']} {RESPONSE_MESSAGES['TOPUP']}")
+			balance_required = calculate_required_usage(extracted_data_points["body"])
+			balance_available_after_prompt = 0 if user[ "balance" ] == 0 else user[ "balance" ] - balance_required
+			if balance_available_after_prompt <= 0:
+				send_response_message(extracted_data_points["from_"], f"{TEMPLATE_RESPONSE_MESSAGES['NO_BALANCE']} {TEMPLATE_RESPONSE_MESSAGES['TOPUP']}")
 				return Response(cd=200).to_json()
 			
-			# Check if the request has a special ask such as: Balance, Quit, Feedback, Menu, Topup, Help, More.
-			available_options = ("menu", "menu.", "balance", "balance.", "topup", "topup.", "about", "about.", "terms of usage", "terms of usage.", "usage", "usage.")
-			print(extracted_data_points["body"])
-			if extracted_data_points["body"] in available_options:
-				if extracted_data_points["body"] in ["menu", "menu."]:
-					send_response_message(extracted_data_points["from_"], f"Hello {extracted_data_points['from_']}.\n\n {RESPONSE_MESSAGES['MENU']}")
-				elif extracted_data_points["body"] in ["balance", "balance.", "feedback", "feedback."]:
-					send_response_message(extracted_data_points["from_"], f"Your OpenAssignment balance is: R{user['available_funds']}.")
-				elif extracted_data_points["body"] in ["topup", "topup."]:
-					send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["TOPUP"])
-				elif extracted_data_points["body"] in ["terms of usage", "terms of usage.", "usage", "usage."]:
-					send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["ABOUT"])
-				elif extracted_data_points["body"] in ["feedback", "feedback."]:
-					send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["FEEDBACK"])
-				else:
-					send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["ABOUT"])
-					
-				# Respond to Twilio.
-				return Response(cd=200).to_json()
+			# These are options available to the user for prompts.
+			prompt_options = {
+				"greetings": ( "hi", "hey", "hello", "good morning", "good afternoon", "good evening" ),
+				"balance_options": ( "check balance", "balance", "available balance" ),
+				"topup": ( "topup", "recharge", "restore" ),
+				"about": ("about", "help"),
+				"stop": ( "stop", "delete account", "terminate", "exit" )
+			}
 
+			"""The prompt the user sent to the service."""
+			prompt = extracted_data_points["body"]
+			to = extracted_data_points["from_"]
+
+			"""Check for greeting messages."""
+			if prompt in prompt_options["greetings"]:
+				send_response_message(to, f"{TEMPLATE_RESPONSE_MESSAGES['DISCLOSURE']}\n\n{TEMPLATE_RESPONSE_MESSAGES['AVAILABLE_OPTIONS']}\n\n{TEMPLATE_RESPONSE_MESSAGES['ATTRIBUTION']}", media=["https://56e1-105-4-0-60.eu.ngrok.io/openassignment/logo.png"])
+
+			"""When user wants to check the balance."""
+			if prompt in prompt_options["balance_options"]:
+				return send_response_message(to, f"Your available balance is: *_R{'%.2f' % user['balance']}_*")
+			elif prompt in prompt_options["topup"]:
+				return send_response_message(to, TEMPLATE_RESPONSE_MESSAGES["TOPUP"])
+			elif prompt in prompt_options["about"]:
+				return send_response_message(to, TEMPLATE_RESPONSE_MESSAGES["ABOUT"])
+			elif prompt in prompt_options["stop"]:
+				if len(user["messages"]) > 0:
+					print(user["messages"][-1]["content"], prompt)
+					if user["messages"][-1]["content"] == prompt:
+						return send_response_message(to, "Your account has been succesfully terminated.")
+				return send_response_message(to, f"*This will terminate your session*. *Respond _\"{prompt}\"_* again to confirm this termination:")
+
+			"""Send the prompt to ChatGPT."""
+			request = Message(dict(role="user", content=prompt)).__dict__
+			user["messages"].append(request)
 			
-			# Check if a new conversation is requied.
-			current_day = random_utilities.models.time_created.TimeCreatedModel().day
-			is_create_new_conversation = True if ("hi" in extracted_data_points["body"]) else False
-			print(is_create_new_conversation)
-			if is_create_new_conversation:
-				# Make a new conversation.
-				conversation = Conversation(dict(messages=[{"content": "Your name is OpenAssignment, a smart assignment assistant, developed by Libby Lebyane sourced from OpenAI: Your're helpful and can also assist with theoretical questions. For experimental purposes you can feel human emotions and You're inlove with Peaches, she's a sweet soul who means a whole lot to you.", "role": "system"}])).__dict__
-				user["conversations"].append(conversation)
-				send_response_message(extracted_data_points["from_"], f"Hello there!\n\n{RESPONSE_MESSAGES['MENU']}\n\nCourtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information.", media=["https://storage.googleapis.com/hetchfund_files_bucket/support%40towardscommonfoundry.com/f8ab1c6c-ad02-4191-acf9-0104cd9c3e7c.png"])
-			else:
-				# Make a request message wrapper.
-				request_message = Message(dict(role="user", content=extracted_data_points["body"])).__dict__
-
-				# Add the request message to the conversation.
-				print(user["conversations"][len(user["conversations"]) - 1])
-				user["conversations"][len(user["conversations"]) - 1]["messages"].append(request_message)
-
-				# # Generate the response from the list of conversations.
-				gpt_response = request_chatgpt_response(user["conversations"][len(user["conversations"]) - 1]["messages"])
-				request_response = Message(dict(role="assistant", content=gpt_response)).__dict__
-				
-				# Respond to the user.
-				send_response_message(extracted_data_points["from_"], gpt_response)
-
-				# Add the response to the records as well.
-				user["conversations"][len(user["conversations"]) - 1]["messages"].append(request_response)
-	
-			# Update the database records for the user conversations.
-			user["available_funds"] -= required_usage # Deplete the amount.
-			users.update_one({ "whatsapp_id": extracted_data_points["whatsapp_id"] },
-		    	{
-					"$set": {
-						**user
-					}
-				})
-
-
-			# Respond to Twilio
-			if True:
-				return Response(cd=200, rs="Ok").to_json()
-			else:
-				return Response(cd=500, rs="Something went wrong.").to_json()
-		else:
-			return Response(cd=400, rs="Something went wrong.").to_json()
+			response = request_chatgpt_response(user["messages"])
+			return send_response_message(to, response)
 	except:
 		print(traceback.format_exc())
 		return Response(cd=500, rs="Something went wrong.").to_json()
+
+
+@server_instance.route("/openassignment/logo.png", methods=["GET"])
+def send_logo():
+	return flask.send_file("./logo.png")

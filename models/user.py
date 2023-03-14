@@ -15,9 +15,9 @@ class User():
         # Groups of messages made in a single day for better context.
         # Conversations should expire the next day. When a conversation expires,
         # Let users know the conversion has expired, but they are allowed to restart it
-        self.conversations = data.get("conversations", [])
+        self.messages = data.get("messages", [])
 
         # User will be allowed to top-up their account for the user of the bot.
-        self.available_funds = data.get("available_amount", 5)
+        self.balance = data.get("balance", 5)
         self.email_address = data.get("email_address", None)
         self.version = (1, 0, 0)
