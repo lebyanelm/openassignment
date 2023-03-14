@@ -180,7 +180,7 @@ def recieve_message_prompt():
 
 			"""Check for greeting messages."""
 			if prompt in prompt_options["greetings"]:
-				send_response_message(to, f"{TEMPLATE_RESPONSE_MESSAGES['DISCLOSURE']}\n\n{TEMPLATE_RESPONSE_MESSAGES['AVAILABLE_OPTIONS']}\n\n{TEMPLATE_RESPONSE_MESSAGES['ATTRIBUTION']}", media=["https://56e1-105-4-0-60.eu.ngrok.io/openassignment/logo.png"])
+				send_response_message(to, f"{TEMPLATE_RESPONSE_MESSAGES['DISCLOSURE']}\n\n{TEMPLATE_RESPONSE_MESSAGES['AVAILABLE_OPTIONS']}\n\n{TEMPLATE_RESPONSE_MESSAGES['ATTRIBUTION']}", media=["https://openassignment.herokuapp.com/openassignment/logo.png"])
 
 			"""When user wants to check the balance."""
 			if prompt in prompt_options["balance_options"]:
