@@ -118,7 +118,6 @@ RESPONSE_MESSAGES = {
 }
 
 
-
 """
 __________________________________
 SERVER INSTANCE ROUTES
@@ -164,33 +163,36 @@ def recieve_prompt():
 			print(extracted_data_points["body"])
 			if extracted_data_points["body"] in available_options:
 				if extracted_data_points["body"] in ["menu", "menu."]:
-					return send_response_message(extracted_data_points["from_"], f"Hello {extracted_data_points['from_']}.\n\n {RESPONSE_MESSAGES['MENU']}")
+					send_response_message(extracted_data_points["from_"], f"Hello {extracted_data_points['from_']}.\n\n {RESPONSE_MESSAGES['MENU']}")
 				elif extracted_data_points["body"] in ["balance", "balance.", "feedback", "feedback."]:
-					return send_response_message(extracted_data_points["from_"], f"Your OpenAssignment balance is: R{user['available_funds']}.")
+					send_response_message(extracted_data_points["from_"], f"Your OpenAssignment balance is: R{user['available_funds']}.")
 				elif extracted_data_points["body"] in ["topup", "topup."]:
-					return send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["TOPUP"])
+					send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["TOPUP"])
 				elif extracted_data_points["body"] in ["terms of usage", "terms of usage.", "usage", "usage."]:
-					return send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["ABOUT"])
+					send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["ABOUT"])
 				elif extracted_data_points["body"] in ["feedback", "feedback."]:
-					return send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["FEEDBACK"])
+					send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["FEEDBACK"])
 				else:
-					return send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["ABOUT"])
+					send_response_message(extracted_data_points["from_"], RESPONSE_MESSAGES["ABOUT"])
+					
+				# Respond to Twilio.
+				return Response(cd=200).to_json()
 
 			
-			# Check if a new conversation is requied
+			# Check if a new conversation is requied.
 			current_day = random_utilities.models.time_created.TimeCreatedModel().day
-			is_create_new_conversation = True if ("hi" == extracted_data_points["body"]) else False
-			
+			is_create_new_conversation = True if ("hi" in extracted_data_points["body"]) else False
+			print(is_create_new_conversation)
 			if is_create_new_conversation:
-				# Make a new conversation
+				# Make a new conversation.
 				conversation = Conversation(dict(messages=[{"content": "Your name is OpenAssignment, a smart assignment assistant, developed by Libby Lebyane sourced from OpenAI: Your're helpful and can also assist with theoretical questions. For experimental purposes you can feel human emotions and You're inlove with Peaches, she's a sweet soul who means a whole lot to you.", "role": "system"}])).__dict__
 				user["conversations"].append(conversation)
 				send_response_message(extracted_data_points["from_"], f"Hello there!\n\n{RESPONSE_MESSAGES['MENU']}\n\nCourtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information.", media=["https://storage.googleapis.com/hetchfund_files_bucket/support%40towardscommonfoundry.com/f8ab1c6c-ad02-4191-acf9-0104cd9c3e7c.png"])
 			else:
-				# Make a request message wrapper
+				# Make a request message wrapper.
 				request_message = Message(dict(role="user", content=extracted_data_points["body"])).__dict__
 
-				# Add the request message to the conversation
+				# Add the request message to the conversation.
 				print(user["conversations"][len(user["conversations"]) - 1])
 				user["conversations"][len(user["conversations"]) - 1]["messages"].append(request_message)
 
@@ -198,13 +200,13 @@ def recieve_prompt():
 				gpt_response = request_chatgpt_response(user["conversations"][len(user["conversations"]) - 1]["messages"])
 				request_response = Message(dict(role="assistant", content=gpt_response)).__dict__
 				
-				# Respond to the user
+				# Respond to the user.
 				send_response_message(extracted_data_points["from_"], gpt_response)
 
 				# Add the response to the records as well.
 				user["conversations"][len(user["conversations"]) - 1]["messages"].append(request_response)
 	
-			# Update the database records for the user conversations
+			# Update the database records for the user conversations.
 			user["available_funds"] -= required_usage # Deplete the amount.
 			users.update_one({ "whatsapp_id": extracted_data_points["whatsapp_id"] },
 		    	{
