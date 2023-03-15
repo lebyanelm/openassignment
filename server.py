@@ -213,7 +213,8 @@ def recieve_message_prompt():
 				return send_response_message(to, f"*This will terminate your session*. *Respond _\"{prompt}\"_* again to confirm this termination:")
 
 			if "imagine:" in prompt:
-					return send_response_message(to, "Generating image")
+					dale_response = openai.Image.create(prompt=prompt.split(":")[1], n=1, size="1024x1024")
+					return send_response_message(to, "Image generated.", media=[dale_response["data"][0]["url"]])
 
 			"""Send the prompt to ChatGPT."""
 			request = Message(dict(role="user", content=prompt)).__dict__
