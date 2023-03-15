@@ -214,7 +214,7 @@ def recieve_message_prompt():
 
 			if "imagine:" in prompt:
 					dale_response = openai.Image.create(prompt=prompt.split(":")[1], n=1, size="1024x1024")
-					return send_response_message(to, "Image generated.", media=[dale_response["data"][0]["url"]])
+					return send_response_message(to, "", media=[dale_response["data"][0]["url"]])
 
 			"""Send the prompt to ChatGPT."""
 			request = Message(dict(role="user", content=prompt)).__dict__
