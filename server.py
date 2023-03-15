@@ -87,9 +87,9 @@ def request_chatgpt_response(messages):
 	# Request data to be made with the request.
 	request_data = {"model": "gpt-3.5-turbo",
 					"messages": messages, 
-					"temperature": random.randrange(0, 1) }
+					"temperature": random.randint(0, 100) / 100 }
 	
-	random_utilities.log(f"Using temperature: {request_data['temperature']}.")
+	random_utilities.log(f"Temperature: {request_data['temperature']}.")
 	
 	# Send the request to the OpenAI API server.
 	request_response = requests.post("https://api.openai.com/v1/chat/completions",
@@ -120,7 +120,7 @@ TEMPLATE_RESPONSE_MESSAGES = {
 	"DISCLOSURE": "Hello! This *should be used for educational purposes* only. Information curated may *_not be fully accurate_*. Please verify the information *_for more accuracy_*.",
 	"AVAILABLE_OPTIONS": '*_Menu_*\n1. *Balance* _("check balance" / "balance" / "available balance")_\n2. *Topup* _("recharge" / "restore" / "topup")_\n3. *About* _("about" / "help")_\n4. *Terminate* _("stop" / "delete account" / "terminate / "exit")_',
 	"FEEDBACK": "I'd love to hear what you think, do tell me: Use format \"Feedback: <feedback content here>\" to send your feedback to us.",
-	"ABOUT": "I'm *OpenAssignment*, a smart assistant designed to assist you with *academic assignments* and *school work*. You can ask me anything and I'll do my best to answer you.",
+	"ABOUT": "I'm *OpenAssignment*, a smart assistant engineered to assist you with *academic assignments* and *school work*. You can ask me anything and I'll do my best to answer you.",
 	"TOPUP": "To topup your *OpenAssignment* account follow this link to make a deposit with your card, *use your WhatsApp phone number as reference*: *https://pay.yoco.com/towards-common-foundry*.",
 	"NO_BALANCE": "You don't have enough funds for this request.",
 	"ATTRIBUTION": "Courtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information."
@@ -162,7 +162,7 @@ def recieve_message_prompt():
 			balance_required = calculate_required_usage(extracted_data_points["body"])
 			balance_available_after_prompt = 0 if user[ "balance" ] == 0 else user[ "balance" ] - balance_required
 			if balance_available_after_prompt <= 0:
-				send_response_message(extracted_data_points["from_"], f"{TEMPLATE_RESPONSE_MESSAGES['NO_BALANCE']} {TEMPLATE_RESPONSE_MESSAGES['TOPUP']}")
+				send_response_message(extracted_data_points["from_"], f"{TEMPLATE_RESPONSE_MESSAGES['NO_BALANCE']}\n\n{TEMPLATE_RESPONSE_MESSAGES['TOPUP']}")
 				return Response(cd=200).to_json()
 			
 			# These are options available to the user for prompts.
@@ -185,15 +185,31 @@ def recieve_message_prompt():
 			"""When user wants to check the balance."""
 			if prompt in prompt_options["balance_options"]:
 				return send_response_message(to, f"Your available balance is: *_R{'%.2f' % user['balance']}_*")
+
 			elif prompt in prompt_options["topup"]:
 				return send_response_message(to, TEMPLATE_RESPONSE_MESSAGES["TOPUP"])
+				
 			elif prompt in prompt_options["about"]:
-				return send_response_message(to, TEMPLATE_RESPONSE_MESSAGES["ABOUT"])
+				return send_response_message(to, f'{TEMPLATE_RESPONSE_MESSAGES["ABOUT"]}\n\n{TEMPLATE_RESPONSE_MESSAGES["ATTRIBUTION"]}')
+				
 			elif prompt in prompt_options["stop"]:
 				if len(user["messages"]) > 0:
 					print(user["messages"][-1]["content"], prompt)
 					if user["messages"][-1]["content"] == prompt:
-						return send_response_message(to, "Your account has been succesfully terminated.")
+						users.delete_one({ "whatsapp_id": extracted_data_points["whatsapp_id"] })
+						return send_response_message(to, "*_Your account has been succesfully terminated, thank you for your usage._* Send a *_\"Hi\"_* message to be re-registered again.")
+
+				request = Message(dict(role="user", content=prompt)).__dict__
+				user["messages"].append(request)
+
+				"""Save the changes made and return response to Twilio."""
+				users.update_one({ "whatsapp_id": extracted_data_points["whatsapp_id"] },
+					{
+						"$set": {
+							"messages": user["messages"]
+						}
+					})
+					
 				return send_response_message(to, f"*This will terminate your session*. *Respond _\"{prompt}\"_* again to confirm this termination:")
 
 			"""Send the prompt to ChatGPT."""
@@ -201,6 +217,18 @@ def recieve_message_prompt():
 			user["messages"].append(request)
 			
 			response = request_chatgpt_response(user["messages"])
+			response_message = Message(dict(role="assistant", content=response)).__dict__
+
+			"""Save the response of the Assistant."""
+			user["messages"].append(response_message)
+
+			"""Save the changes made and return response to Twilio."""
+			users.update_one({ "whatsapp_id": extracted_data_points["whatsapp_id"] },
+				{
+					"$set": {
+						"messages": user["messages"]
+					}
+				})
 			return send_response_message(to, response)
 	except:
 		print(traceback.format_exc())
