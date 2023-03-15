@@ -199,9 +199,6 @@ def recieve_message_prompt():
 						users.delete_one({ "whatsapp_id": extracted_data_points["whatsapp_id"] })
 						return send_response_message(to, "*_Your account has been succesfully terminated, thank you for your usage._* Send a *_\"Hi\"_* message to be re-registered again.")
 
-				if "imagine:" in prompt:
-					return send_response_message(to, "Generating image")
-
 				request = Message(dict(role="user", content=prompt)).__dict__
 				user["messages"].append(request)
 
@@ -214,6 +211,9 @@ def recieve_message_prompt():
 					})
 					
 				return send_response_message(to, f"*This will terminate your session*. *Respond _\"{prompt}\"_* again to confirm this termination:")
+
+			if "imagine:" in prompt:
+					return send_response_message(to, "Generating image")
 
 			"""Send the prompt to ChatGPT."""
 			request = Message(dict(role="user", content=prompt)).__dict__
