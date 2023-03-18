@@ -222,7 +222,7 @@ def recieve_message_prompt():
 				balance_required = calculate_required_usage(extracted_data_points["body"])
 				balance_available_after_prompt = 0 if user[ "balance" ] == 0 else user[ "balance" ] - balance_required
 				if balance_available_after_prompt <= 0:
-					send_response_message(extracted_data_points["from_"], f"{TEMPLATE_RESPONSE_MESSAGES['NO_BALANCE']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['TOPUP']}")
+					return send_response_message(extracted_data_points["from_"], f"{TEMPLATE_RESPONSE_MESSAGES['NO_BALANCE']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['TOPUP']}")
 
 				"""Send the prompt to ChatGPT."""
 				request = Message(dict(role="user", content=prompt)).__dict__
