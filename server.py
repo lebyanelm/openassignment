@@ -177,7 +177,7 @@ def recieve_message_prompt():
 			if prompt in prompt_options["greetings"]:
 				# If this is a new user, send them instructions on how to use the service.
 				print("Messages count:", len(user["messages"]))
-				send_response_message(to, f"{TEMPLATE_RESPONSE_MESSAGES['DISCLOSURE']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['AVAILABLE_OPTIONS']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['INSTRUCTIONS']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['ATTRIBUTION']}", media=["https://openassignment.herokuapp.com/openassignment/logo.png"])
+				return send_response_message(to, f"{TEMPLATE_RESPONSE_MESSAGES['DISCLOSURE']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['AVAILABLE_OPTIONS']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['INSTRUCTIONS']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['ATTRIBUTION']}", media=["https://openassignment.herokuapp.com/openassignment/logo.png"])
 
 			"""When user wants to check the balance."""
 			if prompt in prompt_options["balance_options"]:
