@@ -116,14 +116,15 @@ def calculate_required_usage(prompt: str):
 Template response messages.
 """
 TEMPLATE_RESPONSE_MESSAGES = {
-	"DISCLOSURE": "Hello! This *should be used for educational purposes* only. Information curated may *_not be fully accurate_*. Please verify the information *_for more accuracy_*.",
-	"AVAILABLE_OPTIONS": '*_Menu_*\n1. *Balance* _("check balance" / "balance" / "available balance")_\n2. *Topup* _("recharge" / "restore" / "topup")_\n3. *About* _("about" / "help")_\n4. *Terminate* _("stop" / "delete account" / "terminate / "exit")_',
+	"DISCLOSURE": "Hello! This *should be used for educational purposes* only. Information curated may *_not be fully accurate_*. Please verify the information *_for more accuracy_*. Say *\"Help\"* anytime for help on instructions.",
+	"AVAILABLE_OPTIONS": '*_Options_ (Special commands)*\n\n1. *Balance* _("check balance" / "balance" / "available balance")_\n2. *Topup* _("recharge" / "restore" / "topup")_\n3. *About* _("about" / "help")_\n4. *Terminate* _("stop" / "delete account" / "terminate / "exit")_',
 	"FEEDBACK": "I'd love to hear what you think, do tell me: Use format \"Feedback: <feedback content here>\" to send your feedback to us.",
 	"ABOUT": "I'm *OpenAssignment*, a smart assistant engineered to assist you with *academic assignments* and *school work*. You can ask me anything and I'll do my best to answer you.",
 	"TOPUP": "To topup your *OpenAssignment* account follow this link to make a deposit with your card, *use your WhatsApp phone number as reference*: *https://pay.yoco.com/towards-common-foundry*.",
 	"NO_BALANCE": "You don't have enough funds for this request.",
 	"ATTRIBUTION": "Courtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information.",
-	"INSTRUCTIONS": "*Instructions / How-to*\n\n*OpenAssignment* helps you with academic questions, to ask one just say *Hi* and ask your question, *_eg. How to calculate the gradient of a curve?_ (Verify the information before using it)*\n\nYou can also generate any images from text using *_Image: <description>_* prompt, eg. \"Imagine: An astronaut riding a horse in photorealistic style\"."
+	"INSTRUCTIONS": "*Instructions / How-to-Use*\n\n*OpenAssignment* helps you with academic questions, to ask one just say *\"Hi\"* and ask your question, *_eg. How to calculate the gradient of a curve?_ (Verify the information before using it)*\n\nYou can also generate any images from text using *_Imagine: <description>_* prompt, eg. *\"Imagine: An astronaut riding a horse in photorealistic style\"*.",
+	"SPACER": "\n\n__________________\n\n"
 }
 
 
@@ -175,10 +176,8 @@ def recieve_message_prompt():
 			"""Check for greeting messages."""
 			if prompt in prompt_options["greetings"]:
 				# If this is a new user, send them instructions on how to use the service.
-				if len(user["messages"]) == 0:
-					send_response_message(to, f"{TEMPLATE_RESPONSE_MESSAGES['DISCLOSURE']}\n\n{TEMPLATE_RESPONSE_MESSAGES['AVAILABLE_OPTIONS']}\n\n{TEMPLATE_RESPONSE_MESSAGES['INSTRUCTIONS']}\n\n{TEMPLATE_RESPONSE_MESSAGES['ATTRIBUTION']}", media=["https://openassignment.herokuapp.com/openassignment/logo.png"])
-				else:
-					send_response_message(to, f"{TEMPLATE_RESPONSE_MESSAGES['DISCLOSURE']}\n\n{TEMPLATE_RESPONSE_MESSAGES['AVAILABLE_OPTIONS']}\n\n{TEMPLATE_RESPONSE_MESSAGES['ATTRIBUTION']}", media=["https://openassignment.herokuapp.com/openassignment/logo.png"])
+				print("Messages count:", len(user["messages"]))
+				send_response_message(to, f"{TEMPLATE_RESPONSE_MESSAGES['DISCLOSURE']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['AVAILABLE_OPTIONS']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['INSTRUCTIONS']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['ATTRIBUTION']}", media=["https://openassignment.herokuapp.com/openassignment/logo.png"])
 
 			"""When user wants to check the balance."""
 			if prompt in prompt_options["balance_options"]:
@@ -188,7 +187,7 @@ def recieve_message_prompt():
 				return send_response_message(to, TEMPLATE_RESPONSE_MESSAGES["TOPUP"])
 				
 			elif prompt in prompt_options["about"]:
-				return send_response_message(to, f'{TEMPLATE_RESPONSE_MESSAGES["ABOUT"]}\n\n{TEMPLATE_RESPONSE_MESSAGES["ATTRIBUTION"]}')
+				return send_response_message(to, f'{TEMPLATE_RESPONSE_MESSAGES["ABOUT"]}{TEMPLATE_RESPONSE_MESSAGES["SPACER"]}{TEMPLATE_RESPONSE_MESSAGES["INSTRUCTIONS"]}{TEMPLATE_RESPONSE_MESSAGES["SPACER"]}{TEMPLATE_RESPONSE_MESSAGES["ATTRIBUTION"]}')
 				
 			elif prompt in prompt_options["stop"]:
 				if len(user["messages"]) > 0:
@@ -215,6 +214,7 @@ def recieve_message_prompt():
 
 					# Decrement the balance to cost of image generating per 1024x1024
 					user["balance"] = user["balance"] - 0.38
+					print("Balance left ():", user["balance"])
 
 					send_response_message(to, "This is image was generated with *DALL-E* by *_OpenAI_*. Read more here https://openai.com/policies/dall-e-api/.", media=[dale_response["data"][0]["url"]])
 			else:
@@ -222,7 +222,7 @@ def recieve_message_prompt():
 				balance_required = calculate_required_usage(extracted_data_points["body"])
 				balance_available_after_prompt = 0 if user[ "balance" ] == 0 else user[ "balance" ] - balance_required
 				if balance_available_after_prompt <= 0:
-					send_response_message(extracted_data_points["from_"], f"{TEMPLATE_RESPONSE_MESSAGES['NO_BALANCE']}\n\n{TEMPLATE_RESPONSE_MESSAGES['TOPUP']}")
+					send_response_message(extracted_data_points["from_"], f"{TEMPLATE_RESPONSE_MESSAGES['NO_BALANCE']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['TOPUP']}")
 
 				"""Send the prompt to ChatGPT."""
 				request = Message(dict(role="user", content=prompt)).__dict__
@@ -243,7 +243,8 @@ def recieve_message_prompt():
 			users.update_one({ "whatsapp_id": extracted_data_points["whatsapp_id"] },
 				{
 					"$set": {
-						"messages": user["messages"]
+						"messages": user["messages"],
+						"balance": user["balance"]
 					}
 				})
 			return Response(cd=200).to_json()
