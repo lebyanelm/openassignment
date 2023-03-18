@@ -94,3 +94,7 @@ Another Window Manager (Xfwm4) is already running on screen :0.0
 To replace the current window manager, try "--replace"
 
 (xfwm4:62326): xfwm4-WARNING **: 22:02:11.677: Could not find a screen to manage, exiting
+Another Window Manager (Xfwm4) is already running on screen :0.0
+To replace the current window manager, try "--replace"
+
+(xfwm4:99391): xfwm4-WARNING **: 23:05:02.862: Could not find a screen to manage, exiting

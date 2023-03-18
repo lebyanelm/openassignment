@@ -18,7 +18,7 @@ class User():
         self.messages = data.get("messages", [])
 
         # User will be allowed to top-up their account for the user of the bot.
-        self.balance = data.get("balance", 1)
+        self.balance = data.get("balance", 3)
         self.is_free_candidate = data.get("is_free_candidate", True if self.whatsapp_id in ("27642040465", "27659093376") else False)
         self.email_address = data.get("email_address", None)
         self.version = (1, 0, 0)
