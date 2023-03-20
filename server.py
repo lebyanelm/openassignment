@@ -17,6 +17,7 @@ import openai
 import random_utilities
 import random_utilities.models.time_created
 import random
+import twilio
 
 
 from twilio.rest import Client
@@ -244,6 +245,18 @@ def recieve_message_prompt():
 					"$set": {**user}
 				})
 			return Response(cd=200).to_json()
+	except twilio.base.exceptions.TwilioRestException as e:
+		print(e)
+		retry_request = Message(dict(role="user", content="Make it 1500 characters maximum")).__dict__
+		user["messages"].append(retry_request)
+		second_try_response = request_chatgpt_response(user["messages"])
+		send_response_message(to, second_try_response)
+
+		users.update_one({ "whatsapp_id": extracted_data_points["whatsapp_id"] },
+			{
+				"$set": {**user}
+			})
+		return Response(cd=200).to_json()
 	except:
 		print(traceback.format_exc())
 		return send_response_message(to, "*Something went wrong when producing the response*, content may be too long / an error occured. Request the message again for a *150 words* response.")
