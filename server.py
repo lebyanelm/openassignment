@@ -258,7 +258,7 @@ def recieve_message_prompt():
 			})
 		return Response(cd=200).to_json()
 	except:
-		print(traceback.format_exc())
+		print(traceback.format_exc(), 'response')
 		return send_response_message(to, "*Something went wrong when producing the response*, content may be too long / an error occured. Request the message again for a *150 words* response.")
 
 
