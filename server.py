@@ -176,8 +176,7 @@ def recieve_message_prompt():
 			"""Check for greeting messages."""
 			if prompt in prompt_options["greetings"]:
 				# If this is a new user, send them instructions on how to use the service.
-				print("Messages count:", len(user["messages"]))
-				return send_response_message(to, f"{TEMPLATE_RESPONSE_MESSAGES['DISCLOSURE']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['AVAILABLE_OPTIONS']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['INSTRUCTIONS']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['ATTRIBUTION']}", media=["https://openassignment.herokuapp.com/openassignment/logo.png"])
+				send_response_message(to, f"{TEMPLATE_RESPONSE_MESSAGES['DISCLOSURE']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['AVAILABLE_OPTIONS']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['INSTRUCTIONS']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['ATTRIBUTION']}", media=["https://openassignment.herokuapp.com/openassignment/logo.png"])
 
 			"""When user wants to check the balance."""
 			if prompt in prompt_options["balance_options"]:
@@ -206,7 +205,6 @@ def recieve_message_prompt():
 							"messages": user["messages"]
 						}
 					})
-					
 				return send_response_message(to, f"*This will terminate your session*. *Respond _\"{prompt}\"_* again to confirm this termination:")
 
 			# <Requires balance to make a prompt>
@@ -222,7 +220,6 @@ def recieve_message_prompt():
 
 					# Decrement the balance to cost of image generating per 1024x1024
 					user["balance"] = user["balance"] - 0.38
-					print("Balance left ():", user["balance"])
 
 					send_response_message(to, "This is image was generated with *DALL-E* by *_OpenAI_*. Read more here https://openai.com/policies/dall-e-api/.", media=[dale_response["data"][0]["url"]])
 			else:
@@ -244,10 +241,7 @@ def recieve_message_prompt():
 			"""Save the changes made and return response to Twilio."""
 			users.update_one({ "whatsapp_id": extracted_data_points["whatsapp_id"] },
 				{
-					"$set": {
-						"messages": user["messages"],
-						"balance": user["balance"]
-					}
+					"$set": {**user}
 				})
 			return Response(cd=200).to_json()
 	except:
