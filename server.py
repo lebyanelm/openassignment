@@ -164,9 +164,9 @@ def recieve_message_prompt():
 			prompt_options = {
 				"greetings": ( "hi", "hey", "hello", "good morning", "good afternoon", "good evening" ),
 				"balance_options": ( "check balance", "balance", "available balance" ),
-				"topup": ( "topup", "recharge", "restore" ),
+				"topup": ( "topup", "top up", "recharge", "restore" ),
 				"about": ("about", "help"),
-				"stop": ( "stop", "delete account", "terminate", "exit" )
+				"stop": ( "delete", "stop", "delete account", "terminate", "exit" )
 			}
 
 			"""The prompt the user sent to the service."""
@@ -250,7 +250,7 @@ def recieve_message_prompt():
 			return Response(cd=200).to_json()
 	except:
 		print(traceback.format_exc())
-		return Response(cd=500, rs="Something went wrong.").to_json()
+		return send_response_message(to, "*Something went wrong when producing the response*, content may be too long / an error occured. Request the message again for a *150 words* response.")
 
 
 @server_instance.route("/openassignment/sms", methods=['GET', 'POST'])
