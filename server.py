@@ -253,6 +253,16 @@ def recieve_message_prompt():
 		return Response(cd=500, rs="Something went wrong.").to_json()
 
 
+@server_instance.route("/openassignment/sms", methods=['GET', 'POST'])
+def incoming_sms():
+    """Send a dynamic reply to an incoming text message"""
+    # Get the message the user sent our Twilio number
+    body = flask.request.values
+    print(body)
+
+    return str("Ok")
+
+
 @server_instance.route("/openassignment/logo.png", methods=["GET"])
 def send_logo():
 	return flask.send_file("./logo.png")
