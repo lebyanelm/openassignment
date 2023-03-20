@@ -209,6 +209,14 @@ def recieve_message_prompt():
 					
 				return send_response_message(to, f"*This will terminate your session*. *Respond _\"{prompt}\"_* again to confirm this termination:")
 
+			# <Requires balance to make a prompt>
+			balance_required = calculate_required_usage(extracted_data_points["body"])
+			balance_available_after_prompt = 0 if user[ "balance" ] == 0 else user[ "balance" ] - balance_required
+			if balance_available_after_prompt <= 0:
+				return send_response_message(extracted_data_points["from_"], f"{TEMPLATE_RESPONSE_MESSAGES['NO_BALANCE']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['TOPUP']}")
+
+
+			# < The actual prompts. >
 			if "imagine:" in prompt:
 					dale_response = openai.Image.create(prompt=prompt.split(":")[1], n=1, size="1024x1024")
 
@@ -218,12 +226,6 @@ def recieve_message_prompt():
 
 					send_response_message(to, "This is image was generated with *DALL-E* by *_OpenAI_*. Read more here https://openai.com/policies/dall-e-api/.", media=[dale_response["data"][0]["url"]])
 			else:
-				# <Requires balance to make a prompt>
-				balance_required = calculate_required_usage(extracted_data_points["body"])
-				balance_available_after_prompt = 0 if user[ "balance" ] == 0 else user[ "balance" ] - balance_required
-				if balance_available_after_prompt <= 0:
-					return send_response_message(extracted_data_points["from_"], f"{TEMPLATE_RESPONSE_MESSAGES['NO_BALANCE']}{TEMPLATE_RESPONSE_MESSAGES['SPACER']}{TEMPLATE_RESPONSE_MESSAGES['TOPUP']}")
-
 				"""Send the prompt to ChatGPT."""
 				request = Message(dict(role="user", content=prompt)).__dict__
 				user["messages"].append(request)
