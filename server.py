@@ -86,7 +86,7 @@ def send_response_message(to, body, media = None):
 def request_chatgpt_response(messages):
 	# Request data to be made with the request.
 	request_data = {"model": "gpt-3.5-turbo",
-					"messages": messages, 
+					"messages": messages[len(messages) - 10:], # Focus more on the last 10 messages.
 					"temperature": random.randint(0, 100) / 100 }
 	
 	random_utilities.log(f"Temperature: {request_data['temperature']}.")
