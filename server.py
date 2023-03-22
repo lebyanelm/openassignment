@@ -1,4 +1,4 @@
-"""
+up """
 _________________________________
 OPENASSIGNMENT
 __________________________________
@@ -121,7 +121,7 @@ TEMPLATE_RESPONSE_MESSAGES = {
 	"AVAILABLE_OPTIONS": '*_Options_ (Special commands)*\n\n1. *Balance* _("check balance" / "balance" / "available balance")_\n2. *Topup* _("recharge" / "restore" / "topup")_\n3. *About* _("about" / "help")_\n4. *Terminate* _("stop" / "delete account" / "terminate / "exit")_',
 	"FEEDBACK": "I'd love to hear what you think, do tell me: Use format \"Feedback: <feedback content here>\" to send your feedback to us.",
 	"ABOUT": "I'm *OpenAssignment*, a smart assistant engineered to assist you with *academic assignments* and *school work*. You can ask me anything and I'll do my best to answer you.",
-	"TOPUP": "To topup your *OpenAssignment* account follow this link to make a deposit with your card, *use your WhatsApp phone number as reference*: *https://pay.yoco.com/towards-common-foundry*.",
+	"TOPUP": "Tshepo! To topup your *OpenAssignment* account follow this link to make a deposit with your card, *use your WhatsApp phone number as reference*: *https://pay.yoco.com/towards-common-foundry*.",
 	"NO_BALANCE": "You don't have enough funds for this request.",
 	"ATTRIBUTION": "Courtesy of *Towards Common Foundry, Limited*. Visit *(towardscommonfoundry.com)* for more information.",
 	"INSTRUCTIONS": "*Instructions / How-to-Use*\n\n*OpenAssignment* helps you with academic questions, to ask one just say *\"Hi\"* and ask your question, *_eg. How to calculate the gradient of a curve?_ (Verify the information before using it)*\n\nYou can also generate any images from text using *_Imagine: <description>_* prompt, eg. *\"Imagine: An astronaut riding a horse in photorealistic style\"*.",
