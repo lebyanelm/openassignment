@@ -167,7 +167,8 @@ def recieve_message_prompt():
 				"balance_options": ( "check balance", "balance", "available balance" ),
 				"topup": ( "topup", "top up", "recharge", "restore" ),
 				"about": ("about", "help"),
-				"stop": ( "delete", "stop", "delete account", "terminate", "exit" )
+				"stop": ( "delete", "stop", "delete account", "terminate", "exit" ),
+				"stats": ("usage", "stats", "updates")
 			}
 
 			"""The prompt the user sent to the service."""
@@ -207,7 +208,21 @@ def recieve_message_prompt():
 						}
 					})
 				return send_response_message(to, f"*This will terminate your session*. *Respond _\"{prompt}\"_* again to confirm this termination:")
+			elif prompt in prompt_options["stats"]:
+				if user.get("is_admin") == True:
+					all_users = users.find({})
+					total_messages = 0
+					balance_total = 0
 
+					for current_user in all_users:
+						total_messages += len(current_user.get("messages"))
+						balance_total += current_user.get("balance")
+
+					average_balance = balance_total / len(all_users)
+
+					send_response_message(to, f"Here are the [admin current stats]:\n\nUser count: {len(all_users)}\nTotal messages sent: {total_messages}\nTotal balance: {balance_total}\nAverage balance: {average_balance}")
+
+					
 			# <Requires balance to make a prompt>
 			balance_required = calculate_required_usage(extracted_data_points["body"])
 			balance_available_after_prompt = 0 if user[ "balance" ] == 0 else user[ "balance" ] - balance_required
