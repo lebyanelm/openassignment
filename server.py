@@ -84,11 +84,12 @@ def send_response_message(to, body, media = None):
 
 # Requests a response from the user's request prompt to: https://api.openai.com/v1/chat/completions
 def request_chatgpt_response(messages):
+	messages_length = len(messages)
 	# Request data to be made with the request.
 	request_data = {"model": "gpt-3.5-turbo",
 					"messages": [
 						{ "content": "Your name is OpenAssignment co-developed by Towards Common Foundry, you're a smart academic assistant. You can answer any questions, as long as they are clear and understandable. Always use Emoji's in every response.", "role": "system" },
-						*messages[len(messages) - 10:]
+						*messages[messages_length - 10:]
 					], # Focus more on the last 10 messages.
 					"temperature": random.randint(0, 100) / 100 }
 	
@@ -171,7 +172,7 @@ def recieve_message_prompt():
 				"topup": ( "topup", "top up", "recharge", "restore" ),
 				"about": ("about", "help"),
 				"stop": ( "delete", "stop", "delete account", "terminate", "exit" ),
-				"stats": ("usage", "stats", "updates")
+				"stats": ( "usage", "stats", "updates" )
 			}
 
 			"""The prompt the user sent to the service."""
@@ -192,6 +193,20 @@ def recieve_message_prompt():
 				
 			elif prompt in prompt_options["about"]:
 				return send_response_message(to, f'{TEMPLATE_RESPONSE_MESSAGES["ABOUT"]}{TEMPLATE_RESPONSE_MESSAGES["SPACER"]}{TEMPLATE_RESPONSE_MESSAGES["INSTRUCTIONS"]}{TEMPLATE_RESPONSE_MESSAGES["SPACER"]}{TEMPLATE_RESPONSE_MESSAGES["ATTRIBUTION"]}')
+
+			elif prompt in prompt_options["stats"]:
+				if user.get("is_admin") == True:
+					all_users = list(users.find({}))
+					total_messages = 0
+					balance_total = 0
+
+					for current_user in all_users:
+						total_messages += len(current_user.get("messages"))
+						balance_total += current_user.get("balance")
+
+					average_balance = balance_total / len(all_users)
+
+					return send_response_message(to, f"Here are the [admin current stats]:\n\nUser count: {len(all_users)}\nTotal messages sent: {total_messages}\nTotal balance: {balance_total}\nAverage balance: {average_balance}")
 				
 			elif prompt in prompt_options["stop"]:
 				if len(user["messages"]) > 0:
@@ -211,19 +226,6 @@ def recieve_message_prompt():
 						}
 					})
 				return send_response_message(to, f"*This will terminate your session*. *Respond _\"{prompt}\"_* again to confirm this termination:")
-			elif prompt in prompt_options["stats"]:
-				if user.get("is_admin") == True:
-					all_users = users.find({})
-					total_messages = 0
-					balance_total = 0
-
-					for current_user in all_users:
-						total_messages += len(current_user.get("messages"))
-						balance_total += current_user.get("balance")
-
-					average_balance = balance_total / len(all_users)
-
-					return send_response_message(to, f"Here are the [admin current stats]:\n\nUser count: {len(all_users)}\nTotal messages sent: {total_messages}\nTotal balance: {balance_total}\nAverage balance: {average_balance}")
 
 					
 			# <Requires balance to make a prompt>
