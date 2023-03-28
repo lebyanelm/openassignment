@@ -220,7 +220,7 @@ def recieve_message_prompt():
 
 					average_balance = balance_total / len(all_users)
 
-					send_response_message(to, f"Here are the [admin current stats]:\n\nUser count: {len(all_users)}\nTotal messages sent: {total_messages}\nTotal balance: {balance_total}\nAverage balance: {average_balance}")
+					return send_response_message(to, f"Here are the [admin current stats]:\n\nUser count: {len(all_users)}\nTotal messages sent: {total_messages}\nTotal balance: {balance_total}\nAverage balance: {average_balance}")
 
 					
 			# <Requires balance to make a prompt>
