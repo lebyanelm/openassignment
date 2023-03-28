@@ -86,7 +86,10 @@ def send_response_message(to, body, media = None):
 def request_chatgpt_response(messages):
 	# Request data to be made with the request.
 	request_data = {"model": "gpt-3.5-turbo",
-					"messages": messages[len(messages) - 10:], # Focus more on the last 10 messages.
+					"messages": [
+						{ "content": "Your name is OpenAssignment co-developed by Towards Common Foundry, you're a smart academic assistant. You can answer any questions, as long as they are clear and understandable. Always use Emoji's in every response.", "role": "system" },
+						*messages[len(messages) - 10:]
+					], # Focus more on the last 10 messages.
 					"temperature": random.randint(0, 100) / 100 }
 	
 	random_utilities.log(f"Temperature: {request_data['temperature']}.")

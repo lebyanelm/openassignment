@@ -16,7 +16,7 @@ class User():
         # Conversations should expire the next day. When a conversation expires,
         # Let users know the conversion has expired, but they are allowed to restart it
         self.messages = data.get("messages", [
-            { "content": "Your name is OpenAssignment co-developed by Towards Common Foundry, you're a smart academic assistant. You can answer any questions, as long as they are clear and understandable. Always use Emoji's in every response.", "role": "system" }
+            
         ])
 
         # User will be allowed to top-up their account for the user of the bot.
