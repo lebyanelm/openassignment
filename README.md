@@ -1,4 +1,4 @@
-```markdown
+
 ## 💬 OpenAssignment: WhatsApp-Based Credit Platform with AI Support  
 ![Logo](https://i.imgur.com/lwFpwrv.png)
 
@@ -32,7 +32,5 @@ A backend-first platform designed to enable customers to **add credit and intera
 
 ### 🎯 Impact  
 This project demonstrates a blend of **backend engineering**, **AI integration**, and **chat-first platform design**, reflecting strong capability in building real-world, production-grade systems.
-
 ---
 
-```
