@@ -1,5 +1,3 @@
----
-
 ```markdown
 ## 💬 OpenAssignment: WhatsApp-Based Credit Platform with AI Support  
 ![Logo](https://i.imgur.com/lwFpwrv.png)
