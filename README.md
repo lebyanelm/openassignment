@@ -27,7 +27,7 @@ A backend-first platform designed to enable customers to **add credit and intera
 - Built and documented the **entire backend API**, including routing, business logic, and integrations.  
 - Implemented **secure payment workflows** using Yoco's API.  
 - Integrated **ChatGPT** for automated customer communication.  
-- Deployed to cloud environment (Heroku, Railway, or other), showcasing **DevOps fluency**.  
+- Deployed to cloud environment Heroku, showcasing **DevOps fluency**.  
 - Managed **error handling**, API key security, and data flow across services.
 
 ### 🎯 Impact  
